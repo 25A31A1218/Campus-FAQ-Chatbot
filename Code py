@@ -1,0 +1,107 @@
+import streamlit as st
+from difflib import get_close_matches
+
+st.set_page_config(
+    page_title="Campus FAQ Chatbot",
+    page_icon="🎓",
+    layout="centered"
+)
+
+# Campus FAQ knowledge base
+faq_data = {
+    "admission": "For admission details, please contact the college admissions office or check the official college website.",
+    "courses": "The college offers undergraduate and postgraduate programs across different departments.",
+    "exam": "Exam schedules and notifications are usually announced by the examination department.",
+    "library": "The college library provides textbooks, reference materials, journals, and digital resources.",
+    "hostel": "Hostel availability, fees, and rules can be obtained from the college administration.",
+    "attendance": "Students should maintain the minimum attendance percentage required by the college and university regulations.",
+    "fees": "For fee details, please contact the accounts department or check the latest official fee notification.",
+    "placements": "The placement cell coordinates recruitment drives, training programs, internships, and career opportunities.",
+    "transport": "College transportation information, routes, and timings can be obtained from the transport department.",
+    "canteen": "The campus canteen provides food and refreshments during college working hours.",
+    "contact": "Please contact the college administration office for official contact information.",
+    "departments": "You can contact your respective department office for information about faculty, courses, laboratories, and academic activities."
+}
+
+# Common words/questions mapped to FAQ topics
+keywords = {
+    "admission": ["admission", "join", "joining", "application"],
+    "courses": ["course", "courses", "program", "programs", "degree"],
+    "exam": ["exam", "exams", "examination", "test", "schedule"],
+    "library": ["library", "books", "book"],
+    "hostel": ["hostel", "room", "accommodation"],
+    "attendance": ["attendance", "absent", "presence"],
+    "fees": ["fee", "fees", "payment", "tuition"],
+    "placements": ["placement", "placements", "job", "jobs", "career", "recruitment"],
+    "transport": ["bus", "transport", "route", "routes"],
+    "canteen": ["canteen", "food", "lunch"],
+    "contact": ["contact", "phone", "email", "office"],
+    "departments": ["department", "departments", "faculty"]
+}
+
+
+def find_answer(user_question):
+    question = user_question.lower().strip()
+
+    # Direct keyword matching
+    for topic, words in keywords.items():
+        for word in words:
+            if word in question:
+                return faq_data[topic]
+
+    # Fuzzy matching
+    words_in_question = question.split()
+
+    for word in words_in_question:
+        matches = get_close_matches(
+            word,
+            keywords.keys(),
+            n=1,
+            cutoff=0.7
+        )
+
+        if matches:
+            return faq_data[matches[0]]
+
+    return (
+        "Sorry, I don't have an answer for that yet. "
+        "Try asking about admissions, courses, exams, library, "
+        "hostel, fees, attendance, placements, transport, or departments."
+    )
+
+
+# User interface
+st.title("🎓 Campus FAQ Chatbot")
+st.write("Ask me questions about your college.")
+
+st.divider()
+
+user_question = st.text_input(
+    "Ask your question:",
+    placeholder="Example: When are the exams?"
+)
+
+if st.button("Ask"):
+    if user_question:
+        answer = find_answer(user_question)
+
+        st.subheader("🤖 Chatbot")
+        st.write(answer)
+    else:
+        st.warning("Please enter a question.")
+
+st.divider()
+
+st.subheader("💡 Try asking")
+
+example_questions = [
+    "How can I get admission?",
+    "When are the exams?",
+    "Where is the library?",
+    "What are the hostel facilities?",
+    "How can I check my attendance?",
+    "Tell me about placements"
+]
+
+for question in example_questions:
+    st.write(f"• {question}")
